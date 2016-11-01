@@ -16,20 +16,20 @@
 bool goingForward = true;							//Boolean to know if the car is going forward or backwards
 bool keepGoing = false;								//Boolean to control when the car is moving or not
 int FRONT_DISTANCE = 30;    							//Minimum frontal distance
-int BACK_DISTANCE = 5;   									//Minimum back distance
-int SPEED_FORWARD = 63;										//Speed going forward
-int SPEED_BACKWARDS = -31;								//Speed going backwards
-int SPEED_TURN = 30;
+int BACK_DISTANCE = 5;   							//Minimum back distance
+int SPEED_FORWARD = 63;								//Speed going forward
+int SPEED_BACKWARDS = -31;							//Speed going backwards
+int SPEED_TURN = 30;								//Speed turning
 
 //New variables to manage the line follower (autocalibrated at the beginning)
 int BACKGROUND;
 int LINE = 2300;
-int TOLERANCE = 300;
+int TOLERANCE = 50;
 
 void goStraight()
 {
   startMotor(leftMotor, SPEED_FORWARD);
-	startMotor(rightMotor, -SPEED_FORWARD);
+  startMotor(rightMotor, -SPEED_FORWARD);
 }
 
 void turnLeft()
@@ -46,19 +46,19 @@ void turnRight()
 
 void goForward()
 {
-	if ( SensorValue[lfFrontLeft] < LINE + TOLERANCE)
+  if ( (SensorValue[lfFrontLeft] > LINE - TOLERANCE) && (SensorValue[lfFrontLeft] < LINE + TOLERANCE) )
   {
     turnLeft();
     untilDark(LINE, lfFrontCenter);
   }
 
-	if ( SensorValue[lfFrontRight] < LINE + TOLERANCE)
+  if ( (SensorValue[lfFrontRight] > LINE - TOLERANCE) && (SensorValue[lfFrontRight] < LINE + TOLERANCE) )
   {
     turnRight();
     untilDark(LINE, lfFrontCenter);
   }
   
-	if ( SensorValue[lfFrontCenter] < LINE + TOLERANCE)
+  if ( (SensorValue[lfFrontCenter] > LINE - TOLERANCE) && (SensorValue[lfFrontCenter] < LINE + TOLERANCE) )
   {
     goStraight();
   }
@@ -66,6 +66,7 @@ void goForward()
 
 void goBackwards()
 {
+	// TODO: CREATE THE SAME CODE THAT IS CONTROLLING GOFORWARD BUT IN THE OPPOSITE DIRECTION
 	startMotor(leftMotor, -SPEED_BACKWARDS);
 	startMotor(rightMotor, SPEED_BACKWARDS);
 }
@@ -98,7 +99,8 @@ task main()
 	wait(2); //Wait 2 seconds
 
 	// Calibrate the line and background color
-
+	BACKGROUND = SensorValue[lfFrontLeft];
+	LINE = SensorValue[lfFrontCenter];
 
 	while (true) // Infinite loop
 	{
@@ -128,6 +130,4 @@ task main()
    		 }
    	 }
 	}
-
-
 }
