@@ -17,17 +17,17 @@
 bool goingForward = true;						//Boolean to know if the car is going forward or backwards
 bool keepGoing = false;							//Boolean to control when the car is moving or not
 
-//VALUES TO CALIBRATE
-int FRONT_DISTANCE = 25;    				//Minimum frontal distance
-int BACK_DISTANCE = 5;   						//Minimum back distance
-int SPEED_FORWARD = 20;							//Speed going forward
-int SPEED_BACKWARDS = -31;					//Speed going backwards
-int SPEED_TURN = 5;								//Speed turning
-int TOLERANCE = 50;									//Tolerance to use as the limits into the
+// TODO: CALIBRATE THESE VALUES.
+int FRONT_DISTANCE = 25;    				//Minimum frontal distance: When the car reaches this distance, it will stop. Checked by the frontal sonar sensor.
+//int BACK_DISTANCE = 5;   					//Minimum back distance
+int SPEED_FORWARD = 30;							//Speed going forward: Use a bigger value to speed it up.
+//int SPEED_BACKWARDS = -31;				//Speed going backwards
+int SPEED_TURN = 50;									//Speed turning: Use a bigger value to speed it up.
+int TOLERANCE = 200;								//Tolerance to use as the limits for the LINE value. If the light, color or any condition changes, must be adjusted.
 
-//New variables to manage the line follower (autocalibrated at the beginning)
-int BACKGROUND;
-int LINE = 2300;
+// Variables to manage the line follower (autocalibrated at the beginning)
+//int BACKGROUND;
+int LINE;
 
 void goStraight()
 {
@@ -35,21 +35,33 @@ void goStraight()
   startMotor(rightMotor, -SPEED_FORWARD);
 }
 
-void turnLeft()
-{
-  //startMotor(leftMotor, -SPEED_TURN);
-  startMotor(rightMotor, SPEED_TURN);
-}
-
 void turnRight()
 {
   startMotor(leftMotor, SPEED_TURN);
-  //startMotor(rightMotor, -SPEED_TURN);
+  startMotor(rightMotor, SPEED_TURN);
+}
+
+void turnLeft()
+{
+  startMotor(leftMotor, -SPEED_TURN);
+  startMotor(rightMotor, -SPEED_TURN);
+}
+
+void lightTurnLeft()
+{
+  startMotor(leftMotor, SPEED_FORWARD - 10);
+  startMotor(rightMotor, -SPEED_TURN);
+}
+
+void lighTurnRight()
+{
+  startMotor(leftMotor, SPEED_TURN);
+  startMotor(rightMotor, -SPEED_FORWARD + 10);
 }
 
 void goForward()
 {
-	if (SensorValue(sonarFront) >= FRONT_DISTANCE) // Go forward only when there is no one obstacle on the way.
+	if ( (SensorValue(sonarFront) >= FRONT_DISTANCE) || (SensorValue(sonarFront) < 0) ) // Go forward only when there is no one obstacle on the way.
 	{
 	  if ( (SensorValue[lfFrontLeft] > LINE - TOLERANCE) && (SensorValue[lfFrontLeft] < LINE + TOLERANCE) ) // We are on the left of the line, turn to the right
 	  {
@@ -109,13 +121,28 @@ void checkBumper()
 
 task main()
 {
-	turnFlashlightOn(flashlight, 100); // Turn on flashlight
+	//turnFlashlightOn(flashlight, 100); // Turn on flashlight
 
-	wait(5); //Wait 5 seconds to calibrate
+	//wait(5); //Wait 5 seconds to calibrate
 
 	// Calibrate the line and background color
 	// BACKGROUND = SensorValue[lfFrontLeft];
 	LINE = SensorValue[lfFrontCenter];
+
+	// BEGIN SANDBOX
+	/*
+	//goStraight();
+	//wait(3);
+	turnLeft();
+	wait(2);
+	turnRight();
+	//wait(2);
+
+	wait(2);
+
+	stopCar();
+	*/
+	// END SANDBOX
 
 	while (true) // Infinite loop
 	{
